@@ -1,0 +1,4 @@
+car_blue: https://openclipart.org/detail/190177/dark-blue-racing-car-top-view
+car_red: https://openclipart.org/detail/61201/red-racing-car-top-view
+car_green: https://openclipart.org/detail/190176/green-racing-car-top-view
+car_yellow: https://openclipart.org/detail/190171/yellow-racing-car-top-view
