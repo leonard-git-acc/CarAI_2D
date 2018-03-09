@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2003
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AISimulation", "AISimulation\AISimulation.csproj", "{DA90490F-2046-4062-99FB-27A8DC2A95CF}"
+EndProject
+Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DA90490F-2046-4062-99FB-27A8DC2A95CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA90490F-2046-4062-99FB-27A8DC2A95CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA90490F-2046-4062-99FB-27A8DC2A95CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA90490F-2046-4062-99FB-27A8DC2A95CF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {17DDF3EA-8CBB-45A1-9D21-3D7C7DABA1FF}
+	EndGlobalSection
+EndGlobal
