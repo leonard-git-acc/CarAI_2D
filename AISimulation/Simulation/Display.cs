@@ -18,7 +18,7 @@ namespace Simulation
         public bool Grid { get => grid; set => grid = value; }
 
         public new Bitmap BackgroundImage { get => backgroundImage; set => backgroundImage = value; }
-        public Point BackgroundImageLocation { get => backgroundImageLocation; set => BackgroundImageLocationChanged(value); }
+        public PointF BackgroundImageLocation { get => backgroundImageLocation; set => BackgroundImageLocationChanged(value); }
         public Engine SimulationEngine { get => simulationEngine; set => simulationEngine = value; }
 
 
@@ -27,9 +27,10 @@ namespace Simulation
         private bool details = false;
         private bool grid = false;
 
+
         private Thread displayLoopThread;
         private Bitmap backgroundImage;
-        private Point backgroundImageLocation = new Point(0, 0);
+        private PointF backgroundImageLocation = new Point(0, 0);
         private Size backgroundImageSize = new Size();
         private Image backgroundImageDef = Image.FromFile(Application.StartupPath + @"\resources\background5.png");
         private Bitmap backgroundImageGrid;
@@ -40,6 +41,8 @@ namespace Simulation
 
         private Bitmap[][] car_color;
         private int lod = 5;
+
+        private int trackedCar = -1;
 
         public Display(string backgroundImage, string simulationImage, Point spawn, Point target)
         {
@@ -140,13 +143,29 @@ namespace Simulation
         private void DisplayMouseDown(object sender, MouseEventArgs e)
         {
             MouseLocation = e.Location;
+
+            if (e.Button == MouseButtons.Left)
+            {
+                for (int i = 0; i < simulationEngine.Cars.Length; i++)
+                {
+                    PointF centre = ConvertPoint(simulationEngine.Cars[i].Centre);
+                    
+                    float a = 10 * Zoom;
+
+                    if(MouseLocation.X > centre.X - a && MouseLocation.X < centre.X + a &&
+                       MouseLocation.Y > centre.Y - a && MouseLocation.Y < centre.Y + a)
+                    {
+                        trackedCar = i;
+                    }
+                }
+            }
         }
 
         private void DisplayMouseMove(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
             {
-                BackgroundImageLocation = new Point(BackgroundImageLocation.X + (e.Location.X - MouseLocation.X), BackgroundImageLocation.Y + (e.Location.Y - MouseLocation.Y));
+                BackgroundImageLocation = new PointF(BackgroundImageLocation.X + (e.Location.X - MouseLocation.X), BackgroundImageLocation.Y + (e.Location.Y - MouseLocation.Y));
                 MouseLocation = e.Location;
             }
         }
@@ -188,7 +207,7 @@ namespace Simulation
             }
         }
 
-        private void BackgroundImageLocationChanged(Point bLocation)
+        private void BackgroundImageLocationChanged(PointF bLocation)
         {
             backgroundImageLocation = bLocation;
             this.Refresh();
@@ -224,6 +243,8 @@ namespace Simulation
                 int bheight = (int)(backgroundImageDef.Height * Width / backgroundImageDef.Width * Zoom);
                 backgroundImageSize.Width = bwidth;
                 backgroundImageSize.Height = bheight;
+
+                TrackCar(trackedCar, simulationEngine.Cars);
 
                 e.Graphics.DrawImage(BackgroundImage, BackgroundImageLocation.X, BackgroundImageLocation.Y, bwidth, bheight);
 
@@ -308,9 +329,17 @@ namespace Simulation
                 e.Graphics.FillRectangle(brush, rec);
                 e.Graphics.DrawRectangle(pen, rec);
 
-                if (SimulationEngine.CarRanking != null)
+                if (SimulationEngine.CarRanking != null || trackedCar > -1)
                 {
-                    Neuron[][] neuronLayers = SimulationEngine.CarRanking[SimulationEngine.CarRanking.Length - 1].Brain.AllLayers;
+                    Neuron[][] neuronLayers;
+                    if (trackedCar > -1)
+                    {
+                        neuronLayers = SimulationEngine.Cars[trackedCar].Brain.AllLayers;
+                    }
+                    else
+                    {
+                        neuronLayers = SimulationEngine.CarRanking[SimulationEngine.CarRanking.Length - 1].Brain.AllLayers;
+                    }
 
                     int neuronDistanceX = detailsWidth / 10;
                     int neuronDistanceY = 5;
@@ -371,6 +400,19 @@ namespace Simulation
                 }
             }
 
+        }
+
+        private void TrackCar(int id, Car[] cars)
+        {
+            if (trackedCar > -1)
+            {
+                PointF centre = cars[id].Centre;
+                float xnew = (centre.X * Width / parkourSize.Width) * Zoom;
+                float ynew = centre.Y * xnew / centre.X;
+                PointF newCentre = new PointF(xnew * -1 + Width / 2, ynew * -1 + Height / 2);
+
+                backgroundImageLocation = newCentre;
+            }
         }
 
         private Bitmap GridToBitmap(GridUnit[][] grid)
