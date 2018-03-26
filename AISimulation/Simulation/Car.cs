@@ -14,6 +14,7 @@ namespace Simulation
         public int Length = 40;
         public int Width = 20;
         public byte[][][] Bitmap;
+        public Engine SimulationEngine;
 
         public PointF Centre { get => centre; set => CentreChanged(value); }
         public PointF RightFront;
@@ -44,26 +45,28 @@ namespace Simulation
 
         private PointF centre;
 
-        public Car(Point location, byte[][][] bitmap) // Random 
+        public Car(Point location, byte[][][] bitmap, Engine simEngine) // Random 
         {
             Bitmap = bitmap;
             GenerateRndProperties();
             Centre = location;
+            SimulationEngine = simEngine;
         } 
 
-        public Car(Point location, Car parent, byte[][][] bitmap) // Mutate 
+        public Car(Point location, Car parent, byte[][][] bitmap, Engine simEngine) // Mutate 
         {
             Bitmap = bitmap;
             MutateProperties(parent);
             Centre = location;
-
+            SimulationEngine = simEngine;
         } 
 
-        public Car(Point location, string structure, byte[][][] bitmap) //Load 
+        public Car(Point location, string structure, byte[][][] bitmap, Engine simEngine) //Load 
         {
             Bitmap = bitmap;
             LoadProperties(structure);
             Centre = location;
+            SimulationEngine = simEngine;
         } 
 
         public void GenerateRndProperties()
@@ -137,6 +140,12 @@ namespace Simulation
                 Speed = output[2] * 10; // output[2] / 10;
 
                 Centre = new PointF(Centre.X + speedX, Centre.Y + speedY);
+
+                if (SimulationEngine.LoopSpeed >= 1.0F)
+                {
+                    Distance = GridUnit.GetByLocation(new Point(Convert.ToInt32(Centre.X), Convert.ToInt32(Centre.Y)), SimulationEngine.ParkourGrid, SimulationEngine.GridUnitSize).Value;
+                }
+
             }
         }
 

@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace Simulation
 {
-    class Display : Control
+    class Display : UserControl
     {
         public float Zoom { get => zoom; set => DisplayZoomChanged(value); }
         public bool Render { get => render; set => render = value; }
@@ -43,6 +43,7 @@ namespace Simulation
         private int lod = 5;
 
         private int trackedCar = -1;
+        private bool trackBest = false;
 
         public Display(string backgroundImage, string simulationImage, Point spawn, Point target)
         {
@@ -68,6 +69,7 @@ namespace Simulation
             this.MouseDown += DisplayMouseDown;
             this.MouseMove += DisplayMouseMove;
             this.MouseWheel += DisplayMouseWheel;
+            this.KeyPress += DisplayKeyPress;
             this.Disposed += DisplayDisposed;
         }
 
@@ -167,6 +169,7 @@ namespace Simulation
             {
                 BackgroundImageLocation = new PointF(BackgroundImageLocation.X + (e.Location.X - MouseLocation.X), BackgroundImageLocation.Y + (e.Location.Y - MouseLocation.Y));
                 MouseLocation = e.Location;
+                trackedCar = -1;
             }
         }
 
@@ -184,6 +187,14 @@ namespace Simulation
                     Zoom = Zoom - (Zoom / 10);
             }
 
+        }
+
+        private void DisplayKeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == ' ')
+            {
+                trackBest = !trackBest;
+            }
         }
 
         private void DisplayDisposed(object sender, EventArgs e)
@@ -244,7 +255,7 @@ namespace Simulation
                 backgroundImageSize.Width = bwidth;
                 backgroundImageSize.Height = bheight;
 
-                TrackCar(trackedCar, simulationEngine.Cars);
+                TrackCar();
 
                 e.Graphics.DrawImage(BackgroundImage, BackgroundImageLocation.X, BackgroundImageLocation.Y, bwidth, bheight);
 
@@ -402,11 +413,26 @@ namespace Simulation
 
         }
 
-        private void TrackCar(int id, Car[] cars)
+        private void TrackCar()
         {
+            Car[] cars = simulationEngine.Cars;
+
+            if (trackBest)
+            {
+                int best = GridUnit.GetByLocation(simulationEngine.SpawnLocation, simulationEngine.ParkourGrid, simulationEngine.GridUnitSize).Value;
+                for (int i = 0; i < cars.Length; i++)
+                {
+                    if (cars[i].Distance < best && cars[i].Alive)
+                    {
+                        best = cars[i].Distance;
+                        trackedCar = i;
+                    }
+                }
+            }
+
             if (trackedCar > -1)
             {
-                PointF centre = cars[id].Centre;
+                PointF centre = simulationEngine.Cars[trackedCar].Centre;
                 float xnew = (centre.X * Width / parkourSize.Width) * Zoom;
                 float ynew = centre.Y * xnew / centre.X;
                 PointF newCentre = new PointF(xnew * -1 + Width / 2, ynew * -1 + Height / 2);

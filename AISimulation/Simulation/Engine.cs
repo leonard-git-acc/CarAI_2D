@@ -154,7 +154,7 @@ namespace Simulation
             genCarsAlive = SpawnAmount;
             for (int i = 0; i < SpawnAmount; i++)
             {
-                Cars[i] = new Car(SpawnLocation, ParkourPixel);
+                Cars[i] = new Car(SpawnLocation, ParkourPixel, this);
                 Cars[i].Rotation = SpawnRotation;
             }
         }
@@ -187,8 +187,8 @@ namespace Simulation
 
             for (int i = 0; i < SpawnAmount / 2; i++)
             {
-                Cars[carCount] = new Car(SpawnLocation, survivingCars[i], ParkourPixel);
-                Cars[carCount + 1] = new Car(SpawnLocation, survivingCars[i], ParkourPixel);
+                Cars[carCount] = new Car(SpawnLocation, survivingCars[i], ParkourPixel, this);
+                Cars[carCount + 1] = new Car(SpawnLocation, survivingCars[i], ParkourPixel, this);
                 survivingCars[i] = null;
 
                 Cars[carCount].Rotation = SpawnRotation;
@@ -207,7 +207,7 @@ namespace Simulation
             genCarsAlive = SpawnAmount;
             for (int i = 0; i < SpawnAmount; i++)
             {
-                Cars[i] = new Car(SpawnLocation, structure, ParkourPixel);
+                Cars[i] = new Car(SpawnLocation, structure, ParkourPixel, this);
                 Cars[i].Rotation = SpawnRotation;
             }
         }
