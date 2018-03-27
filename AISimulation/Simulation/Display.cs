@@ -132,6 +132,12 @@ namespace Simulation
         {
             zoom = _zoom;
 
+            //zoom only into the center
+            PointF centre = new PointF(parkourSize.Width / 2, parkourSize.Height / 2);
+            float xnew = (centre.X * Width / parkourSize.Width) * Zoom;
+            float ynew = centre.Y * xnew / centre.X;
+            backgroundImageLocation = new PointF(xnew * -1 + Width / 2, ynew * -1 + Height / 2);
+
             //downscale if image is smaller than its actual size
             this.BackgroundImageRescale();
             this.Refresh();
@@ -186,7 +192,6 @@ namespace Simulation
                 if (Zoom > 0.05)
                     Zoom = Zoom - (Zoom / 10);
             }
-
         }
 
         private void DisplayKeyPress(object sender, KeyPressEventArgs e)
@@ -194,6 +199,47 @@ namespace Simulation
             if (e.KeyChar == ' ')
             {
                 trackBest = !trackBest;
+            }
+
+            else if (e.KeyChar == '+')
+            {
+                if (simulationEngine.LoopSpeed <= 1.0)
+                {
+                    simulationEngine.LoopSpeed -= 0.1F;
+                }
+                else
+                {
+                    simulationEngine.LoopSpeed -= 1.0F;
+                }
+            }
+
+            else if (e.KeyChar == '-')
+            {
+                if (simulationEngine.LoopSpeed < 1.0)
+                {
+                    simulationEngine.LoopSpeed += 0.1F;
+                }
+                else
+                {
+                    simulationEngine.LoopSpeed += 1.0F;
+                }
+            }
+
+            else if (char.ToLower(e.KeyChar) == 'd')
+            {
+                simulationEngine.LoopSpeed = 1.0F;
+            }
+
+            else if (char.ToLower(e.KeyChar) == 's')
+            {
+                if (simulationEngine.LoopThread.ThreadState == ThreadState.Suspended)
+                {
+                    simulationEngine.LoopThread.Resume();
+                }
+                else
+                {
+                    simulationEngine.LoopThread.Suspend();
+                }
             }
         }
 
@@ -417,12 +463,12 @@ namespace Simulation
         {
             Car[] cars = simulationEngine.Cars;
 
-            if (trackBest)
+            if (trackBest && simulationEngine.LoopSpeed >= 0.5)
             {
                 int best = GridUnit.GetByLocation(simulationEngine.SpawnLocation, simulationEngine.ParkourGrid, simulationEngine.GridUnitSize).Value;
                 for (int i = 0; i < cars.Length; i++)
                 {
-                    if (cars[i].Distance < best && cars[i].Alive)
+                    if (cars[i]?.Distance < best && cars[i].Alive)
                     {
                         best = cars[i].Distance;
                         trackedCar = i;
@@ -430,7 +476,7 @@ namespace Simulation
                 }
             }
 
-            if (trackedCar > -1)
+            if (trackedCar > -1 && simulationEngine.LoopSpeed >= 0.75)
             {
                 PointF centre = simulationEngine.Cars[trackedCar].Centre;
                 float xnew = (centre.X * Width / parkourSize.Width) * Zoom;
