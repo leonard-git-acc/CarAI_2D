@@ -5,12 +5,14 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace Simulation 
 {
     class Brain : ICloneable
     {
-        public string BrainStructure;
+        public string BrainStructureString;
+        public Stream BrainStructureStream;
         public Neuron[][] AllLayers;
         public Neuron[][] HiddenLayers;
         public Neuron[] Inputs;
@@ -27,14 +29,19 @@ namespace Simulation
             GenerateNeurons(inputCount, outputCount, layerCount, neuronsPerLayer);
             GenerateBrainStructure();
             // Save structure as string
-            BrainStructure = StringifyBrainStructure();
+            BrainStructureString = StringifyBrainStructure();
         }
 
         public Brain(string brainStructure, int inputCount, int outputCount, int layerCount, int neuronsPerLayer)
         {
             GenerateNeurons(inputCount, outputCount, layerCount, neuronsPerLayer);
             ParseBrainStructure(brainStructure);
-            BrainStructure = StringifyBrainStructure();
+            BrainStructureString = StringifyBrainStructure();
+        }
+
+        public Brain(Stream brainStructure)
+        {
+            ParseStructureStream(brainStructure);
         }
 
         public float[] Think(float[] input) // Compute inputs with the network and return outputs
@@ -76,6 +83,85 @@ namespace Simulation
             }
 
             return outputInfromation;
+        }
+
+        public MemoryStream BuildStructureStream()
+        {
+            MemoryStream structure = new MemoryStream();
+            BinaryWriter binaryWriter = new BinaryWriter(structure);
+
+            binaryWriter.Write(AllLayers.Length); // Layer Amount
+
+            for (int iter = 0; iter < AllLayers.Length; iter++)
+            {
+                binaryWriter.Write(AllLayers[iter].Length); // Neuron Amount
+            }
+
+            for (int iteration = 1; iteration < AllLayers.Length; iteration++)//which layer
+            {
+                for (int iter = 0; iter < AllLayers[iteration].Length; iter++)//which neuron
+                {
+                    Neuron targetNeuron = AllLayers[iteration][iter]; // neuron, that gets output
+
+                    for (int i = 0; i < targetNeuron.Weight.Length; i++)
+                    {
+                        binaryWriter.Write(targetNeuron.Weight[i]);
+                    }
+                }
+            }
+
+            return structure;
+        }
+
+        private void ParseStructureStream(Stream structure)
+        {
+            BinaryReader reader = new BinaryReader(structure);
+
+            int layerAmount = reader.ReadInt32();
+            int inputCount = reader.ReadInt32();
+            int[] hiddenCount = new int[layerAmount - 2];
+
+            for (int i = 0; i < layerAmount - 2; i++)
+            {
+                hiddenCount[i] = reader.ReadInt32();
+            }
+
+            int outputCount = reader.ReadInt32();
+
+            GenerateNeurons(inputCount, outputCount, layerAmount - 2, hiddenCount[0]);
+
+            for (int i = 0; i < inputCount; i++)
+            {
+                Inputs[i].OutputConnections = HiddenLayers[0];
+            }
+
+            for (int iteration = 0; iteration < hiddenCount.Length; iteration++)
+            {
+                for (int iter = 0; iter < hiddenCount[iteration]; iter++)
+                {
+                    Neuron targetNeuron = HiddenLayers[iteration][iter];
+                    targetNeuron.InputConnections = AllLayers[iteration];
+                    targetNeuron.OutputConnections = AllLayers[iteration + 2];
+
+                    for (int i = 0; i < targetNeuron.Weight.Length; i++)
+                    {
+                        targetNeuron.Weight[i] = reader.ReadSingle();
+                    }
+                }
+            }
+
+            for (int iter = 0; iter < outputCount; iter++)
+            {
+                Neuron targetNeuron = Outputs[iter];
+                targetNeuron.InputConnections = HiddenLayers[HiddenLayers.Length - 1];
+
+                for (int i = 0; i < targetNeuron.Weight.Length; i++)
+                {
+                    targetNeuron.Weight[i] = reader.ReadSingle();
+                }
+            }
+
+            structure.Seek(0, SeekOrigin.Begin);
         }
 
         public void MutateBrainStructure(int weakMutationPercentage, int heavyMutationPercentage, float mutationRange)
@@ -310,7 +396,7 @@ namespace Simulation
         public object Clone()
         {
             Brain brain = new Brain();
-            brain.BrainStructure = this.BrainStructure;
+            brain.BrainStructureString = this.BrainStructureString;
             brain.Inputs = new Neuron[this.Inputs.Length];
             brain.Outputs = new Neuron[this.Outputs.Length];
             brain.HiddenLayers = new Neuron[this.HiddenLayers.Length][];

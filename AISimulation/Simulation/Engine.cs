@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -61,6 +62,11 @@ namespace Simulation
         }
 
         public void LoadCarStructure(string structure)
+        {
+            GenerateCars(structure);
+        }
+
+        public void LoadCarStructure(Stream structure)
         {
             GenerateCars(structure);
         }
@@ -202,6 +208,17 @@ namespace Simulation
         }
 
         private void GenerateCars(string structure)
+        {
+            Cars = new Car[SpawnAmount];
+            genCarsAlive = SpawnAmount;
+            for (int i = 0; i < SpawnAmount; i++)
+            {
+                Cars[i] = new Car(SpawnLocation, structure, ParkourPixel, this);
+                Cars[i].Rotation = SpawnRotation;
+            }
+        }
+
+        private void GenerateCars(Stream structure)
         {
             Cars = new Car[SpawnAmount];
             genCarsAlive = SpawnAmount;

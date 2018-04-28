@@ -69,19 +69,26 @@ namespace AISimulation
 
         private void save_button_Click(object sender, EventArgs e)
         {
-            string structure = display.SimulationEngine.CarRanking[display.SimulationEngine.CarRanking.Length - 1].Brain.StringifyBrainStructure();
-            string path = Application.StartupPath + @"\saves\save.car";
-            File.Create(path).Dispose();
-            File.WriteAllText(path, structure);
+            //string structure = display.SimulationEngine.CarRanking[display.SimulationEngine.CarRanking.Length - 1].Brain.StringifyBrainStructure();
+            //string path = @"saves\save.car";
+            //File.Create(path).Dispose();
+            //File.WriteAllText(path, structure);
+
+            FileStream fstream = new FileStream(@"saves\save.carStream", FileMode.Create);
+            MemoryStream stream = display.SimulationEngine.CarRanking[display.SimulationEngine.CarRanking.Length - 1].Brain.BuildStructureStream();
+            stream.WriteTo(fstream);
+            fstream.Close();
+            stream.Close();
 
             MessageBox.Show("Saved");
         }
 
         private void load_button_Click(object sender, EventArgs e)
         {
-            string path = Application.StartupPath + @"\saves\save.car";
-            string structure = File.ReadAllText(path);
-            display.SimulationEngine.LoadCarStructure(structure);
+            //string path = Application.StartupPath + @"\saves\save.car";
+            //string structure = File.ReadAllText(path);
+            //display.SimulationEngine.LoadCarStructure(structure);
+            display.SimulationEngine.LoadCarStructure(new FileStream(@"saves\save.carStream", FileMode.Open));
         }
 
         private void datails_checkBox_CheckedChanged(object sender, EventArgs e)

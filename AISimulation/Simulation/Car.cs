@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
+using System.IO;
 
 namespace Simulation
 {
@@ -67,7 +68,15 @@ namespace Simulation
             LoadProperties(structure);
             Centre = location;
             SimulationEngine = simEngine;
-        } 
+        }
+
+        public Car(Point location, Stream structure, byte[][][] bitmap, Engine simEngine) //Load 
+        {
+            Bitmap = bitmap;
+            LoadProperties(structure);
+            Centre = location;
+            SimulationEngine = simEngine;
+        }
 
         public void GenerateRndProperties()
         {
@@ -118,6 +127,21 @@ namespace Simulation
             Eyes[2] = new Eye(centre, 100, Length, 10, 45, Bitmap);
 
             Brain = new Brain(structure, EyeAmount, BrainOutputs, BrainHiddenLayers, BrainNeuronsPerLayer);
+        }
+
+        public void LoadProperties(Stream structure)
+        {
+            EyeAmount = 3;// RandomNumber.Between(2, 5);
+            TurnSpeed = RandomNumber.Between(1, 50);
+            Acceleration = RandomNumber.Between(1, 10);
+            Color = RandomNumber.Between(0, 3);
+            Eyes = new Eye[EyeAmount];
+
+            Eyes[0] = new Eye(centre, 100, Length, 10, -45, Bitmap);
+            Eyes[1] = new Eye(centre, 100, Length, 10, 0, Bitmap);
+            Eyes[2] = new Eye(centre, 100, Length, 10, 45, Bitmap);
+
+            Brain = new Brain(structure);
         }
 
         public void Drive(int iteration)

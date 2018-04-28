@@ -32,7 +32,7 @@ namespace Simulation
         private Bitmap backgroundImage;
         private PointF backgroundImageLocation = new Point(0, 0);
         private Size backgroundImageSize = new Size();
-        private Image backgroundImageDef = Image.FromFile(Application.StartupPath + @"\resources\background5.png");
+        private Image backgroundImageDef;
         private Bitmap backgroundImageGrid;
         private Point MouseLocation;
 
@@ -176,6 +176,7 @@ namespace Simulation
                 BackgroundImageLocation = new PointF(BackgroundImageLocation.X + (e.Location.X - MouseLocation.X), BackgroundImageLocation.Y + (e.Location.Y - MouseLocation.Y));
                 MouseLocation = e.Location;
                 trackedCar = -1;
+                trackBest = false;
             }
         }
 
@@ -349,7 +350,7 @@ namespace Simulation
                         e.Graphics.DrawString(lodLvl.ToString(), new Font(new FontFamily("Arial"), 20F), new SolidBrush(Color.Red), Width - 30, Height - 30);
                     }
 
-                    if(lodLvl >= 1)
+                    if(lodLvl >= 2)
                         e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
                     e.Graphics.DrawImage(bmp, points);
                 }
@@ -519,7 +520,5 @@ namespace Simulation
 
             return bitmap;
         }
-
-
     }
 }
