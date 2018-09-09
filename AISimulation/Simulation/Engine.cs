@@ -30,7 +30,7 @@ namespace Simulation
         public int SpawnAmount = 100;
         public Point SpawnLocation;
         public Point TargetLocation;
-        public float SpawnRotation = 260.0F;
+        public float SpawnRotation = 0.0F;
 
         private Display display;
         private Thread loopCounterThread;
