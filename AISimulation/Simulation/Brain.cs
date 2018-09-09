@@ -9,7 +9,7 @@ using System.IO;
 
 namespace Simulation 
 {
-    class Brain : ICloneable
+    public class Brain : ICloneable
     {
         public string BrainStructureString;
         public Stream BrainStructureStream;
@@ -18,34 +18,39 @@ namespace Simulation
         public Neuron[] Inputs;
         public Neuron[] Outputs;
 
+        private Func<float, float> activationFunction;
 
         public Brain()
         {
 
         }
 
-        public Brain(int inputCount, int outputCount, int layerCount, int neuronsPerLayer)
+        public Brain(int inputCount, int outputCount, int layerCount, int neuronsPerLayer, float minWeightVal, float maxWeightVal, bool addDisconnectedWeights, Func<float, float> activationFunc)
         {
+            activationFunction = activationFunc;
             GenerateNeurons(inputCount, outputCount, layerCount, neuronsPerLayer);
-            GenerateBrainStructure();
+            GenerateBrainStructure(minWeightVal, maxWeightVal, addDisconnectedWeights);
             // Save structure as string
             BrainStructureString = StringifyBrainStructure();
         }
 
-        public Brain(string brainStructure, int inputCount, int outputCount, int layerCount, int neuronsPerLayer)
+        public Brain(string brainStructure, int inputCount, int outputCount, int layerCount, int neuronsPerLayer, Func<float, float> activationFunc)
         {
+            activationFunction = activationFunc;
             GenerateNeurons(inputCount, outputCount, layerCount, neuronsPerLayer);
-            ParseBrainStructure(brainStructure);
+            ParseBrainStructurString(brainStructure);
             BrainStructureString = StringifyBrainStructure();
         }
 
-        public Brain(Stream brainStructure)
+        public Brain(Stream brainStructure, Func<float, float> activationFunc)
         {
+            activationFunction = activationFunc;
             ParseStructureStream(brainStructure);
         }
 
-        public float[] Think(float[] input) // Compute inputs with the network and return outputs
+        public float[] Think(float[] input, Func<float, float> outFunc) // Compute inputs with the network and return outputs
         {
+            EraseMemory();
             //read in all given inputs and set the value of the input neurons
             for (int i = 0; i < Inputs.Length; i++)
             {
@@ -56,34 +61,13 @@ namespace Simulation
             float[] output = new float[Outputs.Length];
             for (int i = 0; i < Outputs.Length; i++)
             {
-                output[i] = Neuron.Sigmoid(Outputs[i].Activation);
-                //output[i] = (float)Math.Tanh(Outputs[i].Activation);
+                output[i] = outFunc(Outputs[i].Activation);
             }
-            EraseMemory();
+
             return output;
         }
 
-        public string StringifyBrainStructure() // Stringify the weights of the neurons
-        {
-            string outputInfromation = "";
-            for (int iteration = 0; iteration < AllLayers.Length; iteration++)//which layer
-            {
-                outputInfromation += "\nL" + iteration + ":\n";
-
-                for (int iter = 0; iter < AllLayers[iteration].Length; iter++)//which neuron
-                {
-                    Neuron targetNeuron = AllLayers[iteration][iter]; // neuron, that gets output
-                    outputInfromation += "\n\tN" + iter + ":\n";
-
-                    for (int i = 0; i < targetNeuron.Weight.Length; i++)
-                    {
-                        outputInfromation += "\n\t\tW" + i + ":" + targetNeuron.Weight[i];
-                    }
-                }
-            }
-
-            return outputInfromation;
-        }
+        
 
         public MemoryStream BuildStructureStream()
         {
@@ -164,65 +148,6 @@ namespace Simulation
             structure.Seek(0, SeekOrigin.Begin);
         }
 
-        public void MutateBrainStructure(int weakMutationPercentage, int heavyMutationPercentage, float mutationRange)
-        {
-            int rndNum = RandomNumber.Between(0, 100);
-
-            if (rndNum > 90)
-            {
-                for (int iteration = 0; iteration < AllLayers.Length; iteration++)
-                {
-                    for (int iter = 0; iter < AllLayers[iteration].Length; iter++)
-                    {
-                        Neuron targetNeuron = AllLayers[iteration][iter];
-                        rndNum = RandomNumber.Between(0, 100);
-
-                        if (rndNum > 100 - heavyMutationPercentage && targetNeuron.Type != Neuron.NeuronType.InputNeuron)
-                        {
-                            for (int i = 0; i < targetNeuron.Weight.Length; i++)
-                            {
-                                rndNum = RandomNumber.Between(0, 100);
-
-                                if (rndNum > 100 - heavyMutationPercentage)
-                                {
-                                    int mutationRangeInt = Convert.ToInt32(mutationRange * 100);
-                                    float mutation = (float)RandomNumber.Between(mutationRangeInt * -1, mutationRangeInt) / 100;
-                                    targetNeuron.Weight[i] += mutation;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            else if (rndNum > 50)
-            {
-                for (int iteration = 0; iteration < AllLayers.Length; iteration++)
-                {
-                    for (int iter = 0; iter < AllLayers[iteration].Length; iter++)
-                    {
-                        Neuron targetNeuron = AllLayers[iteration][iter];
-                        rndNum = RandomNumber.Between(0, 100);
-
-                        if (rndNum > 100 - weakMutationPercentage && targetNeuron.Type != Neuron.NeuronType.InputNeuron)
-                        {
-                            for (int i = 0; i < targetNeuron.Weight.Length; i++)
-                            {
-                                rndNum = RandomNumber.Between(0, 100);
-
-                                if (rndNum > 100 - weakMutationPercentage)
-                                {
-                                    int mutationRangeInt = Convert.ToInt32(mutationRange / 4 * 100);
-                                    float mutation = (float)RandomNumber.Between(mutationRangeInt * -1, mutationRangeInt) / 100;
-                                    targetNeuron.Weight[i] += mutation;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         private void EraseMemory() // Resets all neuron activations
         {
             for (int iter = 0; iter < AllLayers.Length; iter++)
@@ -251,6 +176,7 @@ namespace Simulation
                 Inputs[i].LayerIndex = i;
                 Inputs[i].InputConnections = new Neuron[inputCount];
                 Inputs[i].Weight = new float[neuronsPerLayer];
+                Inputs[i].ActivationFunction = activationFunction;
             }
 
             //Generate output neurons
@@ -262,6 +188,7 @@ namespace Simulation
                 Outputs[i].LayerIndex = i;
                 Outputs[i].InputConnections = new Neuron[neuronsPerLayer];
                 Outputs[i].Weight = new float[neuronsPerLayer];
+                Outputs[i].ActivationFunction = activationFunction;
             }
 
             //Generate input neurons
@@ -276,6 +203,7 @@ namespace Simulation
                     HiddenLayers[iteration][i].LayerIndex = i;
                     HiddenLayers[iteration][i].InputConnections = new Neuron[neuronsPerLayer];
                     HiddenLayers[iteration][i].Weight = new float[neuronsPerLayer];
+                    HiddenLayers[iteration][i].ActivationFunction = activationFunction;
                 }
             }
 
@@ -289,6 +217,7 @@ namespace Simulation
                 HiddenLayers[0][i].LayerIndex = i;
                 HiddenLayers[0][i].InputConnections = new Neuron[inputCount];
                 HiddenLayers[0][i].Weight = new float[inputCount];
+                HiddenLayers[0][i].ActivationFunction = activationFunction;
             }
 
             AllLayers = new Neuron[HiddenLayers.Length + 2][];
@@ -298,8 +227,11 @@ namespace Simulation
 
         }
 
-        private void GenerateBrainStructure() // Random generates the weights of the neuron
+        private void GenerateBrainStructure(float minWeightVal, float maxWeightVal, bool addDisconnectedWeights) // Randomly generates the weights of the neuron
         {
+            int min = (int)(minWeightVal * 100);
+            int max = (int)(maxWeightVal * 100);
+
             for (int iteration = 0; iteration < AllLayers.Length - 1; iteration++) // which layer
             {
                 for (int iter = 0; iter < AllLayers[iteration].Length; iter++) // which neuron
@@ -317,14 +249,40 @@ namespace Simulation
                         targetNeuron.OutputConnections[i] = outputNeuron;
 
                         outputNeuron.InputConnections[inputCount] = AllLayers[iteration][iter];
-                        outputNeuron.Weight[inputCount] = RandomNumber.Between(-200, 200) / 100.0F * RandomNumber.Between(-1, 1);
+                        outputNeuron.Weight[inputCount] = RandomNumber.Between(min, max) / 100.0F;
+
+                        if(addDisconnectedWeights)
+                            outputNeuron.Weight[inputCount] *= RandomNumber.Between(-1, 1);
+
                         outputNeuron.InputConnectionsCount++;
                     }
                 }
             }
         }
 
-        private void ParseBrainStructure(string _brainStructure) // Parse a given brainStructure string
+        public string StringifyBrainStructure() // Stringify the weights of the neurons
+        {
+            string outputInfromation = "";
+            for (int iteration = 0; iteration < AllLayers.Length; iteration++)//which layer
+            {
+                outputInfromation += "\nL" + iteration + ":\n";
+
+                for (int iter = 0; iter < AllLayers[iteration].Length; iter++)//which neuron
+                {
+                    Neuron targetNeuron = AllLayers[iteration][iter]; // neuron, that gets output
+                    outputInfromation += "\n\tN" + iter + ":\n";
+
+                    for (int i = 0; i < targetNeuron.Weight.Length; i++)
+                    {
+                        outputInfromation += "\n\t\tW" + i + ":" + targetNeuron.Weight[i];
+                    }
+                }
+            }
+
+            return outputInfromation;
+        }
+
+        private void ParseBrainStructurString(string _brainStructure) // Parse a given brainStructure string
         {
             string brainStructure = _brainStructure.Replace("\n", string.Empty).Replace("\t", string.Empty);
             string brainStructureSubstring = brainStructure;
@@ -402,6 +360,8 @@ namespace Simulation
             brain.HiddenLayers = new Neuron[this.HiddenLayers.Length][];
             brain.AllLayers = new Neuron[this.HiddenLayers.Length + 2][];
 
+            brain.activationFunction = this.activationFunction;
+
             for (int i = 0; i < Inputs.Length; i++)
             {
                 brain.Inputs[i] = this.Inputs[i].Clone() as Neuron;
@@ -440,7 +400,7 @@ namespace Simulation
         }
     }
 
-    class Neuron : ICloneable
+    public class Neuron : ICloneable
     {
         public enum NeuronType { HiddenNeuron, InputNeuron, OutputNeuron }
         public string ID; // Name
@@ -454,6 +414,9 @@ namespace Simulation
         public float Bias;
         public float[] Weight;
         public int receivedInputs = 0;
+
+        public Func<float, float> ActivationFunction;
+        public float Delta_i;
 
         public void SetValue(Neuron sender, float value)
         {
@@ -486,14 +449,24 @@ namespace Simulation
         {
             for (int i = 0; i < OutputConnections.Length; i++)
             {
-                OutputConnections[i].SetValue(this, (float)Math.Tanh(Activation));//Sigmoid(Activation));
+                
+                if (!float.IsNaN(ActivationFunction(Activation)))
+                    OutputConnections[i].SetValue(this, ActivationFunction(Activation));
+                else
+                    OutputConnections[i].SetValue(this, 0);
             }
         }
 
-        public static float Sigmoid(double x) // sigmoid function
+        public static float Sigmoid(float x) // sigmoid function
         {
             return (float)(1 / (1 + Math.Exp(-x)));
         }
+
+        public static float ReLU(float x)
+        {
+            return (float)Math.Max(0, x);
+        }
+
 
         public object Clone()
         {
@@ -503,6 +476,7 @@ namespace Simulation
             neuron.LayerIndex = this.LayerIndex;
             neuron.Bias = this.Bias;
             neuron.Weight = new float[this.Weight.Length];
+            neuron.ActivationFunction = this.ActivationFunction;
 
             for (int i = 0; i < Weight.Length; i++)
             {

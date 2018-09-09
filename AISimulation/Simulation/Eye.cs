@@ -17,6 +17,7 @@ namespace Simulation
         public float Rotation { get => rotation; set => rotation = value; }
 
         private byte[][][] bitmap;
+        private Engine engine;
         private PointF[] location;
         private PointF centre;
         private float rotation;
@@ -24,7 +25,7 @@ namespace Simulation
         private float minDistance;
         private float receptorDistance;
 
-        public Eye(PointF _centre, float _maxDistance, float _minDistance, int receptorCount, float _rotation, byte[][][] _bitmap)
+        public Eye(PointF _centre, float _maxDistance, float _minDistance, int receptorCount, float _rotation, byte[][][] _bitmap, Engine _engine)
         {
             centre = _centre;
             maxDistance = _maxDistance;
@@ -32,6 +33,7 @@ namespace Simulation
             receptorDistance = (maxDistance - minDistance) / receptorCount; 
             rotation = _rotation;
             bitmap = _bitmap;
+            engine = _engine;
             location = new PointF[receptorCount];
 
             for (int i = 0; i < receptorCount; i++)
@@ -68,7 +70,17 @@ namespace Simulation
             }
 
             return eyeValue;
+        }
 
+        public float CheckGrid()
+        {
+            GridUnit[][] grid = engine.ParkourGrid;
+            int receptor = location.Length - 1;
+            int x = Convert.ToInt32(location[receptor].X);
+            int y = Convert.ToInt32(location[receptor].Y);
+            GridUnit unit = GridUnit.GetByLocation(new Point(x,y), grid, engine.GridUnitSize);
+
+            return 1.0F - (100.0F * unit.Value / engine.GridMaxValue);
         }
 
         private void CentreChanged(PointF _centre)

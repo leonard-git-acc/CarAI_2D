@@ -23,13 +23,14 @@ namespace Simulation
         public byte[][][] ParkourPixel;
         public GridUnit[][] ParkourGrid;
         public int GridUnitSize = 4;
+        public int GridMaxValue = 0;
 
         public Car[] Cars;
         public Car[] CarRanking;
         public int SpawnAmount = 100;
         public Point SpawnLocation;
         public Point TargetLocation;
-        public float SpawnRotation = 0.0F;
+        public float SpawnRotation = 260.0F;
 
         private Display display;
         private Thread loopCounterThread;
@@ -54,6 +55,7 @@ namespace Simulation
             SpawnLocation = spawn;
             TargetLocation = target;
             GridUnit.FindPath(TargetLocation, ParkourGrid, GridUnitSize);
+            GridMaxValue = GridUnit.GetByLocation(TargetLocation, ParkourGrid, GridUnitSize).Value;
 
             LoopThread = new Thread(new ThreadStart(EngineLoop));
             loopCounterThread = new Thread(IterationCounter);

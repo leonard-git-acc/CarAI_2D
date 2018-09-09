@@ -26,7 +26,7 @@ namespace AISimulation
             display = new Display(Application.StartupPath + @"\resources\" + cfg[0].ToString(), Application.StartupPath + @"\resources\" + cfg[1].ToString(), spawn, target);
             display.Location = new Point(10, 10);
             display.Size = new Size(this.Width - 160, this.Height - 60);
-            display.BackColor = Color.Orange;
+            display.BackColor = Color.FromArgb(255, 38, 127, 0);
             this.Controls.Add(display);
         }
 

@@ -12,8 +12,8 @@ namespace Simulation
 {
     class Car : ICloneable
     {
-        public int Length = 40;
-        public int Width = 20;
+        public int Length = 60;
+        public int Width = 30;
         public byte[][][] Bitmap;
         public Engine SimulationEngine;
 
@@ -41,41 +41,43 @@ namespace Simulation
         public float TurnSpeed = 0.0F;
         public float BreakStrength = 0.0F;
         public int EyeAmount;
+        public int EyeMaxViewDistance = 100;
         public int Color;
 
 
         private PointF centre;
+        private Func<float, float> activationFunc = x => (float)Math.Tanh(x);
 
         public Car(Point location, byte[][][] bitmap, Engine simEngine) // Random 
         {
             Bitmap = bitmap;
+            SimulationEngine = simEngine;
             GenerateRndProperties();
             Centre = location;
-            SimulationEngine = simEngine;
         } 
 
         public Car(Point location, Car parent, byte[][][] bitmap, Engine simEngine) // Mutate 
         {
             Bitmap = bitmap;
+            SimulationEngine = simEngine;
             MutateProperties(parent);
             Centre = location;
-            SimulationEngine = simEngine;
         } 
 
         public Car(Point location, string structure, byte[][][] bitmap, Engine simEngine) //Load 
         {
             Bitmap = bitmap;
+            SimulationEngine = simEngine;
             LoadProperties(structure);
             Centre = location;
-            SimulationEngine = simEngine;
         }
 
         public Car(Point location, Stream structure, byte[][][] bitmap, Engine simEngine) //Load 
         {
             Bitmap = bitmap;
+            SimulationEngine = simEngine;
             LoadProperties(structure);
             Centre = location;
-            SimulationEngine = simEngine;
         }
 
         public void GenerateRndProperties()
@@ -90,11 +92,11 @@ namespace Simulation
             {
                 Eyes[i] = new Eye(centre, RandomNumber.Between(Length, Length + 50), RandomNumber.Between(-90, 90), Bitmap);
             }*/
-            Eyes[0] = new Eye(centre, 100, Length, 10, -45, Bitmap);
-            Eyes[1] = new Eye(centre, 100, Length, 10, 0, Bitmap);
-            Eyes[2] = new Eye(centre, 100, Length, 10, 45, Bitmap);
+            Eyes[0] = new Eye(centre, EyeMaxViewDistance, Length, 10, -45, Bitmap, SimulationEngine);
+            Eyes[1] = new Eye(centre, EyeMaxViewDistance, Length, 10, 0, Bitmap, SimulationEngine);
+            Eyes[2] = new Eye(centre, EyeMaxViewDistance, Length, 10, 45, Bitmap, SimulationEngine);
 
-            Brain = new Brain(EyeAmount, BrainOutputs, BrainHiddenLayers, BrainNeuronsPerLayer);
+            Brain = new Brain(EyeAmount, BrainOutputs, BrainHiddenLayers, BrainNeuronsPerLayer, -2.0F, 2.0F, true, activationFunc); //EyeAmount * 2 -> activates grid view
         }
 
         public void MutateProperties(Car parent)
@@ -107,11 +109,11 @@ namespace Simulation
 
             for (int i = 0; i < Eyes.Length; i++)
             {
-                Eyes[i] = new Eye(centre, parent.Eyes[i].MaxDistance, parent.Eyes[i].MinDistance, parent.Eyes[i].Location.Length, parent.Eyes[i].Rotation, Bitmap);
+                Eyes[i] = new Eye(centre, parent.Eyes[i].MaxDistance, parent.Eyes[i].MinDistance, parent.Eyes[i].Location.Length, parent.Eyes[i].Rotation, Bitmap, SimulationEngine);
             }
 
             Brain = (Brain)parent.Brain.Clone();//new Brain(parent.Brain.BrainStructure, parent.Brain.Inputs.Length, BrainOutputs, BrainHiddenLayers, BrainNeuronsPerLayer);
-            Brain.MutateBrainStructure(15, 3, 0.5F);
+            Brain = Training.MutateBrainStructure(Brain, 15, 3, 0.5F);
         }
 
         public void LoadProperties(string structure)
@@ -122,11 +124,11 @@ namespace Simulation
             Color = RandomNumber.Between(0, 3);
             Eyes = new Eye[EyeAmount];
 
-            Eyes[0] = new Eye(centre, 100, Length, 10, -45, Bitmap);
-            Eyes[1] = new Eye(centre, 100, Length, 10, 0, Bitmap);
-            Eyes[2] = new Eye(centre, 100, Length, 10, 45, Bitmap);
+            Eyes[0] = new Eye(centre, EyeMaxViewDistance, Length, 10, -45, Bitmap, SimulationEngine);
+            Eyes[1] = new Eye(centre, EyeMaxViewDistance, Length, 10, 0, Bitmap, SimulationEngine);
+            Eyes[2] = new Eye(centre, EyeMaxViewDistance, Length, 10, 45, Bitmap, SimulationEngine);
 
-            Brain = new Brain(structure, EyeAmount, BrainOutputs, BrainHiddenLayers, BrainNeuronsPerLayer);
+            Brain = new Brain(structure, EyeAmount * 2, BrainOutputs, BrainHiddenLayers, BrainNeuronsPerLayer, activationFunc);
         }
 
         public void LoadProperties(Stream structure)
@@ -137,11 +139,11 @@ namespace Simulation
             Color = RandomNumber.Between(0, 3);
             Eyes = new Eye[EyeAmount];
 
-            Eyes[0] = new Eye(centre, 100, Length, 10, -45, Bitmap);
-            Eyes[1] = new Eye(centre, 100, Length, 10, 0, Bitmap);
-            Eyes[2] = new Eye(centre, 100, Length, 10, 45, Bitmap);
+            Eyes[0] = new Eye(centre, EyeMaxViewDistance, Length, 10, -45, Bitmap, SimulationEngine);
+            Eyes[1] = new Eye(centre, EyeMaxViewDistance, Length, 10, 0, Bitmap, SimulationEngine);
+            Eyes[2] = new Eye(centre, EyeMaxViewDistance, Length, 10, 45, Bitmap, SimulationEngine);
 
-            Brain = new Brain(structure);
+            Brain = new Brain(structure, activationFunc);
         }
 
         public void Drive(int iteration)
@@ -157,11 +159,15 @@ namespace Simulation
                 {
                     input[i] = Eyes[i].CheckGround();
                 }
+                /*for (int i = EyeAmount; i < EyeAmount * 2; i++)
+                {
+                    input[i] = Eyes[i - EyeAmount].CheckGrid();
+                }*/
 
                 Lifetime = iteration;
-                output = Brain.Think(input);
-                Rotation += (output[0] - output[1]) * 10;
-                Speed = output[2] * 10; // output[2] / 10;
+                output = Brain.Think(input, Neuron.Sigmoid);
+                Rotation += (output[0] - output[1]) * 8;
+                Speed = output[2] * 10;
 
                 Centre = new PointF(Centre.X + speedX, Centre.Y + speedY);
 
