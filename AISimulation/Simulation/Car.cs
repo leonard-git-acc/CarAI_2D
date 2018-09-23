@@ -24,9 +24,7 @@ namespace Simulation
         public PointF LeftBack;
 
         public Brain Brain;
-        public int BrainOutputs = 3;
-        public int BrainHiddenLayers = 2;
-        public int BrainNeuronsPerLayer = 8;
+        public int[] BrainLayers = new int[] { 3, 8, 5, 3 };
 
         public Eye[] Eyes;
         public bool Alive = true;
@@ -82,7 +80,7 @@ namespace Simulation
 
         public void GenerateRndProperties()
         {
-            EyeAmount = 3;// RandomNumber.Between(2, 5);
+            EyeAmount = BrainLayers[0];// RandomNumber.Between(2, 5);
             TurnSpeed = RandomNumber.Between(1, 50);
             Acceleration = RandomNumber.Between(1, 10);
             Color = RandomNumber.Between(0, 3);
@@ -96,7 +94,7 @@ namespace Simulation
             Eyes[1] = new Eye(centre, EyeMaxViewDistance, Length, 10, 0, Bitmap, SimulationEngine);
             Eyes[2] = new Eye(centre, EyeMaxViewDistance, Length, 10, 45, Bitmap, SimulationEngine);
 
-            Brain = new Brain(EyeAmount, BrainOutputs, BrainHiddenLayers, BrainNeuronsPerLayer, -2.0F, 2.0F, true, activationFunc); //EyeAmount * 2 -> activates grid view
+            Brain = new Brain(BrainLayers, -2.0F, 2.0F, true, activationFunc); //EyeAmount * 2 -> activates grid view
         }
 
         public void MutateProperties(Car parent)
@@ -128,7 +126,7 @@ namespace Simulation
             Eyes[1] = new Eye(centre, EyeMaxViewDistance, Length, 10, 0, Bitmap, SimulationEngine);
             Eyes[2] = new Eye(centre, EyeMaxViewDistance, Length, 10, 45, Bitmap, SimulationEngine);
 
-            Brain = new Brain(structure, EyeAmount * 2, BrainOutputs, BrainHiddenLayers, BrainNeuronsPerLayer, activationFunc);
+            Brain = new Brain(structure, BrainLayers, activationFunc);
         }
 
         public void LoadProperties(Stream structure)
