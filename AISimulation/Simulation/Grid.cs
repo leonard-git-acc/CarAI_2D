@@ -33,7 +33,7 @@ namespace Simulation
         }
     }
 
-    class GridUnit
+    public class GridUnit
     {
         public int Value = -1; // Distance to the target
         public Point Location; // Location in the given image

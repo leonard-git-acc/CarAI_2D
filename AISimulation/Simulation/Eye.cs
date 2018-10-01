@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Simulation
 {
-    class Eye
+    public class Eye
     {
         public PointF[] Location { get => location; set => location = value; }
         public PointF Centre { get => centre; set => CentreChanged(value); }

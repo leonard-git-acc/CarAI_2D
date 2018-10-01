@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+# SharpDevelop 4.4
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AISimulation", "AISimulation.csproj", "{DA90490F-2046-4062-99FB-27A8DC2A95CF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DA90490F-2046-4062-99FB-27A8DC2A95CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA90490F-2046-4062-99FB-27A8DC2A95CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA90490F-2046-4062-99FB-27A8DC2A95CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA90490F-2046-4062-99FB-27A8DC2A95CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+EndGlobal

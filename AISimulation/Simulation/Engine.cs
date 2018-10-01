@@ -11,7 +11,7 @@ using System.Windows.Forms;
 
 namespace Simulation
 {
-    class Engine
+    public class Engine
     {
         public Thread LoopThread;
         public long LoopIterations = 0;
@@ -31,6 +31,8 @@ namespace Simulation
         public Point SpawnLocation;
         public Point TargetLocation;
         public float SpawnRotation = 0.0F;
+        public int CarLength = 60;
+        public int CarWidth = 30;
 
         private Display display;
         private Thread loopCounterThread;
@@ -43,6 +45,11 @@ namespace Simulation
         protected virtual void OnEngineUpdate()
         {
             display.Invoke(new MethodInvoker(delegate { UpdateEngine?.Invoke(this, EventArgs.Empty); }));
+        }
+
+        public Engine()
+        {
+
         }
 
         public Engine(Display _display, string simulationImage, Point spawn, Point target)
@@ -60,7 +67,7 @@ namespace Simulation
             LoopThread = new Thread(new ThreadStart(EngineLoop));
             loopCounterThread = new Thread(IterationCounter);
             loopCounterThread.Start();
-            GenerateCars();
+            //GenerateCars();
         }
 
         public void LoadCarStructure(string structure)
@@ -156,7 +163,7 @@ namespace Simulation
             }
         }
 
-        private void GenerateCars()
+        public void GenerateCars()
         {
             Cars = new Car[SpawnAmount];
             genCarsAlive = SpawnAmount;
@@ -164,6 +171,8 @@ namespace Simulation
             {
                 Cars[i] = new Car(SpawnLocation, ParkourPixel, this);
                 Cars[i].Rotation = SpawnRotation;
+                Cars[i].Width = CarWidth;
+                Cars[i].Length = CarLength;
             }
         }
 
@@ -203,6 +212,10 @@ namespace Simulation
                 Cars[carCount].Centre = SpawnLocation;
                 Cars[carCount].Alive = true;
 
+                Cars[carCount + 1].Rotation = SpawnRotation;
+                Cars[carCount + 1].Centre = SpawnLocation;
+                Cars[carCount + 1].Alive = true;
+
                 carCount += 2;
             }
 
@@ -217,6 +230,8 @@ namespace Simulation
             {
                 Cars[i] = new Car(SpawnLocation, structure, ParkourPixel, this);
                 Cars[i].Rotation = SpawnRotation;
+                Cars[i].Width = CarWidth;
+                Cars[i].Length = CarLength;
             }
         }
 
@@ -228,6 +243,8 @@ namespace Simulation
             {
                 Cars[i] = new Car(SpawnLocation, structure, ParkourPixel, this);
                 Cars[i].Rotation = SpawnRotation;
+                Cars[i].Width = CarWidth;
+                Cars[i].Length = CarLength;
             }
         }
 

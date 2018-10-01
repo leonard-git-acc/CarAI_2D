@@ -10,7 +10,7 @@ using System.IO;
 
 namespace Simulation
 {
-    class Car : ICloneable
+    public class Car : ICloneable
     {
         public int Length = 60;
         public int Width = 30;
@@ -60,6 +60,8 @@ namespace Simulation
             SimulationEngine = simEngine;
             MutateProperties(parent);
             Centre = location;
+            Width = parent.Width;
+            Length = parent.Length;
         } 
 
         public Car(Point location, string structure, byte[][][] bitmap, Engine simEngine) //Load 
@@ -80,7 +82,7 @@ namespace Simulation
 
         public void GenerateRndProperties()
         {
-            EyeAmount = BrainLayers[0];// RandomNumber.Between(2, 5);
+            EyeAmount = BrainLayers[0];
             TurnSpeed = RandomNumber.Between(1, 50);
             Acceleration = RandomNumber.Between(1, 10);
             Color = RandomNumber.Between(0, 3);
@@ -110,13 +112,13 @@ namespace Simulation
                 Eyes[i] = new Eye(centre, parent.Eyes[i].MaxDistance, parent.Eyes[i].MinDistance, parent.Eyes[i].Location.Length, parent.Eyes[i].Rotation, Bitmap, SimulationEngine);
             }
 
-            Brain = (Brain)parent.Brain.Clone();//new Brain(parent.Brain.BrainStructure, parent.Brain.Inputs.Length, BrainOutputs, BrainHiddenLayers, BrainNeuronsPerLayer);
+            Brain = (Brain)parent.Brain.Clone();
             Brain = Training.MutateBrainStructure(Brain, 15, 3, 0.5F);
         }
 
         public void LoadProperties(string structure)
         {
-            EyeAmount = 3;// RandomNumber.Between(2, 5);
+            EyeAmount = 3;
             TurnSpeed = RandomNumber.Between(1, 50);
             Acceleration = RandomNumber.Between(1, 10);
             Color = RandomNumber.Between(0, 3);
@@ -131,7 +133,7 @@ namespace Simulation
 
         public void LoadProperties(Stream structure)
         {
-            EyeAmount = 3;// RandomNumber.Between(2, 5);
+            EyeAmount = 3;
             TurnSpeed = RandomNumber.Between(1, 50);
             Acceleration = RandomNumber.Between(1, 10);
             Color = RandomNumber.Between(0, 3);

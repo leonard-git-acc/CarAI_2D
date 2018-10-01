@@ -10,108 +10,125 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Simulation;
 
-namespace AISimulation
+namespace Simulation
 {
     public partial class MainForm : Form
     {
-        Display display;
+        public Display SimulationDisplay;
+        Engine engine;
+
+        SettingsForm settings;
 
         public MainForm()
         {
             InitializeComponent();
-            object[] cfg = LoadCfg();
-            Point spawn = (Point)cfg[2];
-            Point target = (Point)cfg[3];
+            this.WindowState = FormWindowState.Maximized;
 
-            display = new Display(Application.StartupPath + @"\resources\" + cfg[0].ToString(), Application.StartupPath + @"\resources\" + cfg[1].ToString(), spawn, target);
-            display.Location = new Point(10, 10);
-            display.Size = new Size(this.Width - 160, this.Height - 60);
-            display.BackColor = Color.FromArgb(255, 38, 127, 0);
-            this.Controls.Add(display);
+            settings = new SettingsForm(this);
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        public void ConfirmSettings()
+        {
+            if(SimulationDisplay != null)
+            {
+                SimulationDisplay.Dispose();
+            }
+
+            SimulationDisplay = new Display(settings.OverPath, settings.SimPath, settings.SpawnLocation, settings.TargetLocation);
+            engine = SimulationDisplay.SimulationEngine;
+            engine.SpawnRotation = settings.CarRotation;
+            engine.CarWidth = settings.CarWidth;
+            engine.CarLength = settings.CarLength;
+
+            SimulationDisplay.Location = new Point(0, 0);
+            SimulationDisplay.Size = new Size(this.Width, this.Height);
+            SimulationDisplay.BackColor = Color.FromArgb(255, 38, 127, 0);
+            this.Controls.Add(SimulationDisplay);
+
+            this.control_panel.Enabled = true;
+
+            SimulationDisplay.StartSimulation();
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
         {
 
         }
 
-        private void Form1_Shown(object sender, EventArgs e)
+        private void MainForm_Shown(object sender, EventArgs e)
         {
-            display.StartSimulation();
+            settings.Show();
         }
 
-        private void Form1_SizeChanged(object sender, EventArgs e)
+        private void MainForm_SizeChanged(object sender, EventArgs e)
         {
-            display.Width = this.Width - 160;
-            display.Height = this.Height - 60;
+            if(SimulationDisplay != null)
+            {
+                SimulationDisplay.Width = this.Width;
+                SimulationDisplay.Height = this.Height;
+            }
         }
 
-        private void trackBar1_Scroll(object sender, EventArgs e)
+        private void render_checkBox_CheckedChanged(object sender, EventArgs e)
         {
-            display.SimulationEngine.LoopSpeed = (float)trackBar1.Value / 100;
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            trackBar1.Value = 100;
-            display.SimulationEngine.LoopSpeed = trackBar1.Value / 100;
-        }
-
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
-        {
-            display.Render = checkBox1.Checked;
+            SimulationDisplay.Render = render_checkBox.Checked;
         }
 
         private void grid_checkBox_CheckedChanged(object sender, EventArgs e)
         {
-            display.Grid = grid_checkBox.Checked;
+            SimulationDisplay.Grid = grid_checkBox.Checked;
         }
 
         private void save_button_Click(object sender, EventArgs e)
         {
-            //string structure = display.SimulationEngine.CarRanking[display.SimulationEngine.CarRanking.Length - 1].Brain.StringifyBrainStructure();
-            //string path = @"saves\save.car";
-            //File.Create(path).Dispose();
-            //File.WriteAllText(path, structure);
+            if(SimulationDisplay.SimulationEngine.CarRanking != null)
+            {
+                MemoryStream stream = SimulationDisplay.SimulationEngine.CarRanking[SimulationDisplay.SimulationEngine.CarRanking.Length - 1].Brain.BuildStructureStream();
+                FileStream fstream = new FileStream(@"saves\save.carStream", FileMode.Create);
+                stream.WriteTo(fstream);
+                fstream.Close();
+                stream.Close();
 
-            FileStream fstream = new FileStream(@"saves\save.carStream", FileMode.Create);
-            MemoryStream stream = display.SimulationEngine.CarRanking[display.SimulationEngine.CarRanking.Length - 1].Brain.BuildStructureStream();
-            stream.WriteTo(fstream);
-            fstream.Close();
-            stream.Close();
-
-            MessageBox.Show("Saved");
+                MessageBox.Show("Car Saved", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
 
         private void load_button_Click(object sender, EventArgs e)
         {
-            //string path = Application.StartupPath + @"\saves\save.car";
-            //string structure = File.ReadAllText(path);
-            //display.SimulationEngine.LoadCarStructure(structure);
-            display.SimulationEngine.LoadCarStructure(new FileStream(@"saves\save.carStream", FileMode.Open));
+            FileStream fstream = new FileStream(@"saves\save.carStream", FileMode.Open);
+            SimulationDisplay.SimulationEngine.LoadCarStructure(fstream);
+            fstream.Close();
         }
 
         private void datails_checkBox_CheckedChanged(object sender, EventArgs e)
         {
-            display.Details = datails_checkBox.Checked;
+            SimulationDisplay.Details = datails_checkBox.Checked;
         }
 
-        private object[] LoadCfg()
+        private void halfspeed_button_Click(object sender, EventArgs e)
         {
-            string[] str = File.ReadLines(Application.StartupPath + @"\cfg\image.cfg").ToArray();
-            string background = str[0].Substring(str[0].IndexOf(": \"") + 3, str[0].IndexOf("\";") - str[0].IndexOf(": \"") - 3);
-            string simulation = str[1].Substring(str[1].IndexOf(": \"") + 3, str[1].IndexOf("\";") - str[1].IndexOf(": \"") - 3);
+            SimulationDisplay.SimulationEngine.LoopSpeed = 2.0F;
+        }
 
-            Point[] points = new Point[2];
-            for (int i = 2; i < 4; i++)
-            {
-                string x = str[i].Substring(str[i].IndexOf(": \"") + 3, str[i].IndexOf(",") - str[i].IndexOf(": \"") - 3);
-                string y = str[i].Substring(str[i].IndexOf(",") + 2, str[i].IndexOf("\";") - str[i].IndexOf(",") - 2);
+        private void defaultspeed_button_Click(object sender, EventArgs e)
+        {
+            SimulationDisplay.SimulationEngine.LoopSpeed = 1.0F;
+        }
 
-                points[i - 2] = new Point(int.Parse(x), int.Parse(y));
-            }
+        private void doublespeed_button_Click(object sender, EventArgs e)
+        {
+            SimulationDisplay.SimulationEngine.LoopSpeed = 0.5F;
+        }
 
-            return new object[] { background, simulation, points[0], points[1] };
+        private void unlimitedspeed_button_Click(object sender, EventArgs e)
+        {
+            SimulationDisplay.SimulationEngine.LoopSpeed = 0.0F;
+        }
+
+        private void settings_button_Click(object sender, EventArgs e)
+        {
+            this.control_panel.Enabled = false;
+            settings.Show();
         }
     }
 }

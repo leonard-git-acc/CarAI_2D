@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace Simulation
 {
-    class Display : UserControl
+    public class Display : UserControl
     {
         public float Zoom { get => zoom; set => DisplayZoomChanged(value); }
         public bool Render { get => render; set => render = value; }
@@ -273,6 +273,7 @@ namespace Simulation
 
         public void StartSimulation()
         {
+            SimulationEngine.GenerateCars();
             SimulationEngine.LoopThread.Start();
             displayLoopThread.Start();
         }
