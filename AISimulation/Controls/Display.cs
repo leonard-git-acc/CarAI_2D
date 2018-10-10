@@ -247,6 +247,20 @@ namespace Simulation
         private void DisplayDisposed(object sender, EventArgs e)
         {
             StopSimulation();
+            SimulationEngine.Dispose();
+
+            backgroundImage.Dispose();
+            backgroundImageDef.Dispose();
+            backgroundImageGrid.Dispose();
+            foreach (var car in car_color)
+            {
+                foreach (var lod in car)
+                {
+                    lod.Dispose();
+                }
+            }
+
+            base.Dispose();
         }
 
         private void BackgroundImageRescale()

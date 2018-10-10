@@ -18,7 +18,7 @@ namespace Simulation
         {
             InitializeComponent();
             InitializeCustomComponent();
-            form = _form;
+            mainForm = _form;
 
             previewCar = new Car(new Point(preview_panel.Width / 2, preview_panel.Height / 2), new byte[1][][], new Engine());
 
@@ -46,7 +46,7 @@ namespace Simulation
         private Bitmap spawnSnippet;
         private Bitmap carBmp;
 
-        private MainForm form;
+        private MainForm mainForm;
 
         private void SettingsForm_Load(object sender, EventArgs e)
         {
@@ -107,6 +107,8 @@ namespace Simulation
             previewCar.Width = CarWidth;
             previewCar.Length = CarLength;
             previewCar.CentreChanged(previewCar.Centre);
+
+            mainForm.SettingsControl.BackgroundImage = new Bitmap(Image.FromFile(SimPath));
         }
 
         private void CropSimImg()
@@ -228,7 +230,7 @@ namespace Simulation
             string path = "";
 
             OpenFileDialog openDialog = new OpenFileDialog();
-            openDialog.InitialDirectory = Application.StartupPath + @"\resources";
+            openDialog.InitialDirectory = Application.StartupPath + @"\resources\backgrounds";
             openDialog.Filter = "Images|*.BMP;*.JPG;*.JPEG;*.TIF;*.TIFF;*.PNG";
 
             DialogResult result = openDialog.ShowDialog();
@@ -250,8 +252,11 @@ namespace Simulation
                     SimPath = path;
                     OverPath = path;
                     simBmp = new Bitmap(Image.FromFile(SimPath));
+
                     CropSimImg();
                     preview_panel.Refresh();
+
+                    mainForm.SettingsControl.BackgroundImage = simBmp;
                 }
                 else if (btn.Name.Contains("over"))
                 {
@@ -300,18 +305,113 @@ namespace Simulation
 
         private void start_button_Click(object sender, EventArgs e)
         {
-            form.ConfirmSettings();
+            mainForm.ConfirmSettings();
             this.Hide();
+        }
+
+        private void select_button_Click(object sender, EventArgs e)
+        {
+            Button btn = sender as Button;
+            mainForm.SettingsControl.Active = true;
+            mainForm.SettingsControl.Visible = true;
+
+            mainForm.DrawPad.Visible = false;
+
+            if (btn.Name.Contains("Spawn"))
+            {
+                mainForm.SettingsControl.SelectableType = SettingsControl.SelectType.Spawn;
+                mainForm.SettingsControl.Visible = true;
+                mainForm.SettingsControl.Active = true;
+
+                mainForm.TopMost = true;
+                this.TopMost = false;
+
+            }
+            else if (btn.Name.Contains("Target"))
+            {
+                mainForm.SettingsControl.SelectableType = SettingsControl.SelectType.Target;
+                mainForm.SettingsControl.Visible = true;
+                mainForm.SettingsControl.Active = true;
+
+                mainForm.TopMost = true;
+                this.TopMost = false;
+            }
+        }
+
+        private void draw_button_Click(object sender, EventArgs e)
+        {
+            //mainForm.DrawPad.ParkourBitmap = new Bitmap(SimPath);
+            mainForm.DrawPad.Visible = true;
+
+            mainForm.SettingsControl.Visible = false;
+            mainForm.SettingsControl.Active = false;
+
+            mainForm.TopMost = true;
+            this.TopMost = false;
+        }
+
+        public void SelectionComplete()
+        {
+            if (mainForm.SettingsControl.SelectableType == SettingsControl.SelectType.Spawn)
+            {
+                SpawnLocation = mainForm.SettingsControl.SelectedSpawn;
+                spawnLocationX_textBox.Text = SpawnLocation.X.ToString();
+                spawnLocationY_textBox.Text = SpawnLocation.Y.ToString();
+
+                mainForm.TopMost = false;
+                this.TopMost = true;
+            }
+            else if (mainForm.SettingsControl.SelectableType == SettingsControl.SelectType.Target)
+            {
+                TargetLocation = mainForm.SettingsControl.SelectedTarget;
+                targetLocationX_textBox.Text = TargetLocation.X.ToString();
+                targetLocationY_textBox.Text = TargetLocation.Y.ToString();
+
+                mainForm.TopMost = false;
+                this.TopMost = true;
+            }
+        }
+
+        public void DrawingComplete()
+        {
+            string path = @"resources\backgrounds\";
+            int count = Directory.GetFiles(path).Length;
+            path = path + "background" + count + ".png";
+            mainForm.DrawPad.ParkourBitmap.Save(path);
+
+            //Load Image
+            simImgPath_textBox.Text = path;
+            simImgPath_textBox.SelectionStart = simImgPath_textBox.Text.Length - 1;
+            simImgPath_textBox.SelectionLength = 0;
+
+            overImgPath_textBox.Text = path;
+            overImgPath_textBox.SelectionStart = overImgPath_textBox.Text.Length - 1;
+            overImgPath_textBox.SelectionLength = 0;
+
+            SimPath = path;
+            OverPath = path;
+            simBmp = new Bitmap(Image.FromFile(SimPath));
+
+            CropSimImg();
+            preview_panel.Refresh();
+
+            mainForm.SettingsControl.BackgroundImage = simBmp;
+            mainForm.TopMost = false;
+            this.TopMost = true;
+            mainForm.DrawPad.Visible = false;
+            mainForm.DrawPad.Reset();
         }
 
         private void SettingsForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (form.SimulationDisplay == null)
-                form.Close();
-            form.control_panel.Enabled = true;
+            if (mainForm.SimulationDisplay == null)
+                mainForm.Close();
+            mainForm.control_panel.Enabled = true;
 
             this.Hide();
             e.Cancel = true;
         }
+
+
     }
 }

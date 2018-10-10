@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.defaultspeed_button = new System.Windows.Forms.Button();
             this.render_checkBox = new System.Windows.Forms.CheckBox();
             this.grid_checkBox = new System.Windows.Forms.CheckBox();
@@ -131,6 +132,7 @@
             this.control_panel.Name = "control_panel";
             this.control_panel.Size = new System.Drawing.Size(84, 279);
             this.control_panel.TabIndex = 7;
+            this.control_panel.Visible = false;
             // 
             // settings_button
             // 
@@ -182,6 +184,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(884, 561);
             this.Controls.Add(this.control_panel);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainForm";
             this.Text = "CarAI";
             this.Load += new System.EventHandler(this.MainForm_Load);

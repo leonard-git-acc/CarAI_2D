@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
             this.label1 = new System.Windows.Forms.Label();
             this.simImgSearch_button = new System.Windows.Forms.Button();
             this.simImgPath_textBox = new System.Windows.Forms.TextBox();
@@ -58,6 +59,7 @@
             this.selectTarget_button = new System.Windows.Forms.Button();
             this.save_button = new System.Windows.Forms.Button();
             this.start_button = new System.Windows.Forms.Button();
+            this.draw_button = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.rotation_trackBar)).BeginInit();
             this.SuspendLayout();
             // 
@@ -73,7 +75,7 @@
             // 
             // simImgSearch_button
             // 
-            this.simImgSearch_button.Location = new System.Drawing.Point(380, 65);
+            this.simImgSearch_button.Location = new System.Drawing.Point(298, 65);
             this.simImgSearch_button.Name = "simImgSearch_button";
             this.simImgSearch_button.Size = new System.Drawing.Size(75, 23);
             this.simImgSearch_button.TabIndex = 1;
@@ -86,7 +88,7 @@
             this.simImgPath_textBox.Location = new System.Drawing.Point(17, 68);
             this.simImgPath_textBox.Name = "simImgPath_textBox";
             this.simImgPath_textBox.ReadOnly = true;
-            this.simImgPath_textBox.Size = new System.Drawing.Size(357, 20);
+            this.simImgPath_textBox.Size = new System.Drawing.Size(275, 20);
             this.simImgPath_textBox.TabIndex = 2;
             // 
             // overImgPath_textBox
@@ -94,7 +96,7 @@
             this.overImgPath_textBox.Location = new System.Drawing.Point(17, 107);
             this.overImgPath_textBox.Name = "overImgPath_textBox";
             this.overImgPath_textBox.ReadOnly = true;
-            this.overImgPath_textBox.Size = new System.Drawing.Size(357, 20);
+            this.overImgPath_textBox.Size = new System.Drawing.Size(275, 20);
             this.overImgPath_textBox.TabIndex = 3;
             // 
             // label2
@@ -117,7 +119,7 @@
             // 
             // overImgSearch_button
             // 
-            this.overImgSearch_button.Location = new System.Drawing.Point(380, 104);
+            this.overImgSearch_button.Location = new System.Drawing.Point(298, 104);
             this.overImgSearch_button.Name = "overImgSearch_button";
             this.overImgSearch_button.Size = new System.Drawing.Size(75, 23);
             this.overImgSearch_button.TabIndex = 6;
@@ -305,6 +307,7 @@
             this.selectSpawn_button.TabIndex = 26;
             this.selectSpawn_button.Text = "Select";
             this.selectSpawn_button.UseVisualStyleBackColor = true;
+            this.selectSpawn_button.Click += new System.EventHandler(this.select_button_Click);
             // 
             // selectTarget_button
             // 
@@ -314,6 +317,7 @@
             this.selectTarget_button.TabIndex = 27;
             this.selectTarget_button.Text = "Select";
             this.selectTarget_button.UseVisualStyleBackColor = true;
+            this.selectTarget_button.Click += new System.EventHandler(this.select_button_Click);
             // 
             // save_button
             // 
@@ -335,11 +339,22 @@
             this.start_button.UseVisualStyleBackColor = true;
             this.start_button.Click += new System.EventHandler(this.start_button_Click);
             // 
+            // draw_button
+            // 
+            this.draw_button.Location = new System.Drawing.Point(379, 65);
+            this.draw_button.Name = "draw_button";
+            this.draw_button.Size = new System.Drawing.Size(75, 23);
+            this.draw_button.TabIndex = 30;
+            this.draw_button.Text = "Draw";
+            this.draw_button.UseVisualStyleBackColor = true;
+            this.draw_button.Click += new System.EventHandler(this.draw_button_Click);
+            // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(467, 608);
+            this.Controls.Add(this.draw_button);
             this.Controls.Add(this.start_button);
             this.Controls.Add(this.save_button);
             this.Controls.Add(this.selectTarget_button);
@@ -372,6 +387,7 @@
             this.Controls.Add(this.label1);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "SettingsForm";
             this.Text = "Settings";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SettingsForm_FormClosing);
@@ -424,5 +440,6 @@
         private System.Windows.Forms.Button selectTarget_button;
         private System.Windows.Forms.Button save_button;
         private System.Windows.Forms.Button start_button;
+        private System.Windows.Forms.Button draw_button;
     }
 }

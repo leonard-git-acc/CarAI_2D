@@ -11,7 +11,7 @@ using System.Windows.Forms;
 
 namespace Simulation
 {
-    public class Engine
+    public class Engine : IDisposable
     {
         public Thread LoopThread;
         public long LoopIterations = 0;
@@ -259,6 +259,16 @@ namespace Simulation
             Car[] sortedCars = cars.OrderBy(car => car.Distance).ThenBy(car => car.Lifetime).Reverse().ToArray();
 
             return sortedCars;
+        }
+
+        public void Dispose()
+        {
+            ParkourBitmap.Dispose();
+
+            ParkourPixel = null;
+            ParkourGrid = null;
+            Cars = null;
+            CarRanking = null;
         }
     }
 }

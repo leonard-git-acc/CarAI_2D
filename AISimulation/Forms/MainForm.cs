@@ -15,16 +15,32 @@ namespace Simulation
     public partial class MainForm : Form
     {
         public Display SimulationDisplay;
-        Engine engine;
-
-        SettingsForm settings;
+        public Engine SimulationEngine;
+        public SettingsControl SettingsControl;
+        public SettingsForm Settings;
+        public DrawPad DrawPad;
 
         public MainForm()
         {
             InitializeComponent();
             this.WindowState = FormWindowState.Maximized;
 
-            settings = new SettingsForm(this);
+            SettingsControl = new SettingsControl(this);
+            SettingsControl.Location = new Point(0, 0);
+            SettingsControl.Size = new Size(this.Width, this.Height);
+            SettingsControl.BackColor = Color.White;
+            SettingsControl.Visible = false;
+            SettingsControl.Active = false;
+            this.Controls.Add(SettingsControl);
+
+            DrawPad = new DrawPad(this);
+            DrawPad.Location = new Point(30, 30);
+            DrawPad.Size = new Size(this.Width - 20, this.Height - 20);
+            DrawPad.BackColor = Color.White;
+            DrawPad.Visible = false;
+            this.Controls.Add(DrawPad);
+
+            Settings = new SettingsForm(this);
         }
 
         public void ConfirmSettings()
@@ -34,11 +50,11 @@ namespace Simulation
                 SimulationDisplay.Dispose();
             }
 
-            SimulationDisplay = new Display(settings.OverPath, settings.SimPath, settings.SpawnLocation, settings.TargetLocation);
-            engine = SimulationDisplay.SimulationEngine;
-            engine.SpawnRotation = settings.CarRotation;
-            engine.CarWidth = settings.CarWidth;
-            engine.CarLength = settings.CarLength;
+            SimulationDisplay = new Display(Settings.OverPath, Settings.SimPath, Settings.SpawnLocation, Settings.TargetLocation);
+            SimulationEngine = SimulationDisplay.SimulationEngine;
+            SimulationEngine.SpawnRotation = Settings.CarRotation;
+            SimulationEngine.CarWidth = Settings.CarWidth;
+            SimulationEngine.CarLength = Settings.CarLength;
 
             SimulationDisplay.Location = new Point(0, 0);
             SimulationDisplay.Size = new Size(this.Width, this.Height);
@@ -46,6 +62,7 @@ namespace Simulation
             this.Controls.Add(SimulationDisplay);
 
             this.control_panel.Enabled = true;
+            this.control_panel.Visible = true;
 
             SimulationDisplay.StartSimulation();
         }
@@ -57,15 +74,21 @@ namespace Simulation
 
         private void MainForm_Shown(object sender, EventArgs e)
         {
-            settings.Show();
+            Settings.Show();
         }
 
         private void MainForm_SizeChanged(object sender, EventArgs e)
         {
-            if(SimulationDisplay != null)
+            SettingsControl.Width = this.Width;
+            SettingsControl.Height = this.Height;
+
+            DrawPad.Width = this.Width - 80;
+            DrawPad.Height = this.Height - 80;
+
+            if (SimulationDisplay != null)
             {
                 SimulationDisplay.Width = this.Width;
-                SimulationDisplay.Height = this.Height;
+                SimulationDisplay.Height = this.Height;                
             }
         }
 
@@ -128,7 +151,7 @@ namespace Simulation
         private void settings_button_Click(object sender, EventArgs e)
         {
             this.control_panel.Enabled = false;
-            settings.Show();
+            Settings.Show();
         }
     }
 }
