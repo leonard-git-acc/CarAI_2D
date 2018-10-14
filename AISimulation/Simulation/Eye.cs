@@ -48,15 +48,18 @@ namespace Simulation
             byte[] red = new byte[] { 255, 255, 0, 0 };
             float eyeValue = 0;
 
-            foreach (PointF loc in location)
+            for(int i = location.Length - 1; i >= 0; i--)
             {
+                PointF loc = location[i];
+
                 int x = Math.Min(bitmap[0].Length - 1, Math.Max(0, Convert.ToInt32(loc.X)));
                 int y = Math.Min(bitmap.Length - 1, Math.Max(0, Convert.ToInt32(loc.Y)));
                 byte[] pixel = bitmap[y][x];
+                float val = 1.0F / location.Length;
 
                 if (compareColor(pixel, black))
                 {
-                    eyeValue += 1.0F / location.Length;
+                    eyeValue = val * (location.Length - i);
                 }
                 else
                 {

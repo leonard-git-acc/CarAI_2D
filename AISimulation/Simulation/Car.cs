@@ -42,7 +42,6 @@ namespace Simulation
         public int EyeMaxViewDistance = 100;
         public int Color;
 
-
         private PointF centre;
         private Func<float, float> activationFunc = x => (float)Math.Tanh(x);
 
@@ -50,6 +49,8 @@ namespace Simulation
         {
             Bitmap = bitmap;
             SimulationEngine = simEngine;
+            Width = simEngine.CarWidth;
+            Length = simEngine.CarLength;
             GenerateRndProperties();
             Centre = location;
         } 
@@ -58,16 +59,20 @@ namespace Simulation
         {
             Bitmap = bitmap;
             SimulationEngine = simEngine;
-            MutateProperties(parent);
-            Centre = location;
             Width = parent.Width;
             Length = parent.Length;
+            MutateProperties(parent);
+            Centre = location;
+
         } 
 
         public Car(Point location, string structure, byte[][][] bitmap, Engine simEngine) //Load 
         {
             Bitmap = bitmap;
             SimulationEngine = simEngine;
+            Width = simEngine.CarWidth;
+            Length = simEngine.CarLength;
+
             LoadProperties(structure);
             Centre = location;
         }
@@ -76,6 +81,8 @@ namespace Simulation
         {
             Bitmap = bitmap;
             SimulationEngine = simEngine;
+            Width = simEngine.CarWidth;
+            Length = simEngine.CarLength;
             LoadProperties(structure);
             Centre = location;
         }
@@ -83,6 +90,7 @@ namespace Simulation
         public void GenerateRndProperties()
         {
             EyeAmount = BrainLayers[0];
+            EyeMaxViewDistance = Length * 5 / 3;
             TurnSpeed = RandomNumber.Between(1, 50);
             Acceleration = RandomNumber.Between(1, 10);
             Color = RandomNumber.Between(0, 3);
@@ -92,9 +100,9 @@ namespace Simulation
             {
                 Eyes[i] = new Eye(centre, RandomNumber.Between(Length, Length + 50), RandomNumber.Between(-90, 90), Bitmap);
             }*/
-            Eyes[0] = new Eye(centre, EyeMaxViewDistance, Length, 10, -45, Bitmap, SimulationEngine);
-            Eyes[1] = new Eye(centre, EyeMaxViewDistance, Length, 10, 0, Bitmap, SimulationEngine);
-            Eyes[2] = new Eye(centre, EyeMaxViewDistance, Length, 10, 45, Bitmap, SimulationEngine);
+            Eyes[0] = new Eye(centre, EyeMaxViewDistance, Length / 2, 10, -45, Bitmap, SimulationEngine);
+            Eyes[1] = new Eye(centre, EyeMaxViewDistance, Length / 2, 10, 0, Bitmap, SimulationEngine);
+            Eyes[2] = new Eye(centre, EyeMaxViewDistance, Length / 2, 10, 45, Bitmap, SimulationEngine);
 
             Brain = new Brain(BrainLayers, -2.0F, 2.0F, true, activationFunc); //EyeAmount * 2 -> activates grid view
         }
@@ -118,7 +126,8 @@ namespace Simulation
 
         public void LoadProperties(string structure)
         {
-            EyeAmount = 3;
+            EyeAmount = BrainLayers[0];
+            EyeMaxViewDistance = Length * 5 / 3;
             TurnSpeed = RandomNumber.Between(1, 50);
             Acceleration = RandomNumber.Between(1, 10);
             Color = RandomNumber.Between(0, 3);
@@ -133,7 +142,8 @@ namespace Simulation
 
         public void LoadProperties(Stream structure)
         {
-            EyeAmount = 3;
+            EyeAmount = BrainLayers[0];
+            EyeMaxViewDistance = Length * 5 / 3;
             TurnSpeed = RandomNumber.Between(1, 50);
             Acceleration = RandomNumber.Between(1, 10);
             Color = RandomNumber.Between(0, 3);

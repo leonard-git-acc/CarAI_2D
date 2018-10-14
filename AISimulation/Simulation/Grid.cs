@@ -120,7 +120,7 @@ namespace Simulation
                     GridUnit[] neighbours = GetNeighbours(selectedUnits[i], grid);
                     foreach (GridUnit unit in neighbours)
                     {
-                        if (unit.Value == -1 && unit.AccessibilityPercentage >= 85)
+                        if (unit.Value == -1 && unit.AccessibilityPercentage >= 75)
                         {
                             unit.Value = -2; // selected units get id -2 to eliminate reselection
                             neighbourUnits.Add(unit);

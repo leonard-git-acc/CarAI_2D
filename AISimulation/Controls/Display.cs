@@ -407,11 +407,25 @@ namespace Simulation
                     Neuron[][] neuronLayers;
                     if (trackedCar > -1)
                     {
-                        neuronLayers = SimulationEngine.Cars[trackedCar].Brain.AllLayers;
+                        if(SimulationEngine.Cars[trackedCar] != null)
+                        {
+                            neuronLayers = SimulationEngine.Cars[trackedCar].Brain.AllLayers;
+                        }
+                        else
+                        {
+                            return;
+                        }
                     }
                     else
                     {
-                        neuronLayers = SimulationEngine.CarRanking[SimulationEngine.CarRanking.Length - 1].Brain.AllLayers;
+                        if (SimulationEngine.CarRanking[SimulationEngine.CarRanking.Length - 1] != null)
+                        {
+                            neuronLayers = SimulationEngine.CarRanking[SimulationEngine.CarRanking.Length - 1].Brain.AllLayers;
+                        }
+                        else
+                        {
+                            return;
+                        }
                     }
 
                     int neuronDistanceX = detailsWidth / 10;
@@ -464,6 +478,9 @@ namespace Simulation
                                 ellbrush = new SolidBrush(Color.Yellow);
                             }
                             e.Graphics.FillEllipse(ellbrush, ellipse);
+
+                            if(trackedCar > -1)
+                                e.Graphics.DrawString(neuronLayers[iteration][iter].Activation.ToString(), new Font("Arial", 10.0F), new SolidBrush(Color.Black), ellipse.Location);
 
                             neuronDistanceY = detailsHeight / neuronLayers[1].Length * (iter + 1);
                         }
